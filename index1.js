@@ -16,7 +16,7 @@ try {
 
     if (!user_id) throw new Error("no user_id found");
 
-    addUser(socket.id, user_id);
+    addUser(socket, socket.id, user_id);
 
     io.emit("all", socket.id + " connected");
 

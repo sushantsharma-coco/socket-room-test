@@ -1,11 +1,25 @@
 const { onlineUsers, signOptions, onlineUsersCounter } = require("./state");
 
-function addUser(sid, uid) {
+function addUser(socket, sid, uid) {
   if (onlineUsersCounter % 2 == 0) {
-    onlineUsers["room-" + (onlineUsersCounter - 1)] = { uid: uid, sid: sid };
+    onlineUsers[uid] = {
+      sid: sid,
+      room: `room-${onlineUsersCounter}`,
+      sign: "",
+    };
+
+    socket.join(onlineUsers[uid].room);
   } else {
-    onlineUsers["room-" + onlostpointercapture] = { uid: uid, sid: sid };
+    onlineUsers[uid] = {
+      sid: sid,
+      room: `room-${onlineUsersCounter - 1}`,
+      sign: "",
+    };
+
+    socket.join(onlineUsers[uid].room);
   }
+
+  onlineUsersCounter++;
 }
 
 function assignSign(sid, sign) {}

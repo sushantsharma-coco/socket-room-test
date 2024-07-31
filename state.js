@@ -1,4 +1,4 @@
-const onlineUsers = {}; // room :{uid1:sid,sign:x/o}
+const onlineUsers = {}; // uid :{ sid:sid,sign:x/o,room:roomNumber}
 let onlineUsersCounter = 0;
 const signOptions = {
   x: "x",
