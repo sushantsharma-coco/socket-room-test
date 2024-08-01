@@ -1,4 +1,10 @@
-const { onlineUsers, signOptions, onlineUsersCounter } = require("./state");
+let {
+  onlineUsers,
+  signOptions,
+  onlineUsersCounter,
+  board,
+  winningCombinations,
+} = require("./state");
 
 function addUser(socket, sid, uid) {
   if (!sid || !uid) return false;
@@ -18,6 +24,7 @@ function addUser(socket, sid, uid) {
       sign: "",
     };
   }
+  console.log(onlineUsers[uid]);
 
   socket.emit("room update", "you have joined room " + onlineUsers[uid].room);
 
@@ -47,18 +54,40 @@ function addUser(socket, sid, uid) {
   return true;
 }
 
-function assignSign(sid, sign) {}
+function takeTurn(socket, uid) {
+  socket.emit("take-turn", "its your turn choose a position");
 
-function getTotalUsersCount() {}
+  socket.on("position", (position) => {
+    if (position > 9 || position < 0) {
+      socket.emit("invalid-position", `position : ${position} is invalid`);
+    }
 
-function getRoomUsersCount() {}
+    if (board[position] == "") {
+      board[position] = socket.id;
+      if (checkWinner(socket.id)) {
+        return true;
+      }
+    } else {
+      socket.emit(
+        "invalid-positiion",
+        `position : ${position} is already filled`
+      );
+    }
+  });
 
-function sendUserDetails() {}
+  return false;
+}
+
+function checkWinner(id) {
+  winningCombinations.forEach(([a, b, c]) => {
+    if (((board[a] == board[b]) == board[c]) == id) {
+      return true;
+    }
+  });
+  return false;
+}
 
 module.exports = {
   addUser,
-  getRoomUsersCount,
-  getTotalUsersCount,
-  sendUserDetails,
-  assignSign,
+  takeTurn,
 };

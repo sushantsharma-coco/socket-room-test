@@ -1,7 +1,8 @@
 const app = require("express")();
 const http = require("http");
 const { Server } = require("socket.io");
-const { addUser } = require("./socketUtils");
+const { addUser, takeTurn } = require("./socketUtils");
+const { onlineUsers } = require("./state");
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -14,12 +15,23 @@ try {
 
     const { user_id } = socket.handshake.query;
 
-    if (!user_id) throw new Error("no user_id found");
+    if (!user_id) return;
 
-    addUser(socket, socket.id, user_id);
+    let addedUser = addUser(socket, socket.id, user_id);
 
-    io.emit("all", socket.id + " connected");
+    if (!addedUser) return;
 
+    tictactoe
+      .to(onlineUsers[user_id].room)
+      .emit("all", socket.id + " connected");
+
+    let ifWinner = takeTurn(socket);
+
+    if (ifWinner) {
+      ((uid) => {
+        tictactoe.socketsLeave(onlineUsers[uid].room);
+      })();
+    }
     socket.on("disconnect", () => {
       io.emit("all", socket.id + " disconnected");
 
