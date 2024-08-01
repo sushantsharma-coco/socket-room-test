@@ -24,6 +24,10 @@ function addUser(socket, sid, uid) {
       room: `room-${Math.floor(onlineUsersCounter / 2)}`,
       sign: "",
     };
+
+    if (onlineUsers[uid].uno % 2 == 0) {
+      nextChance[onlineUsers[uid].room] = "x";
+    }
   }
   console.log(onlineUsers[uid]);
 
@@ -58,7 +62,10 @@ function addUser(socket, sid, uid) {
 function takeTurn(socket, uid) {
   socket.emit("take-turn", "its your turn choose a position");
 
-  nextChance[onlineUsers[uid].room] = onlineUsers[uid].sign;
+  if (onlineUsers[uid].sign !== nextChance[onlineUsers[uid].room]) {
+    socket.emit("wrong-chance", "it's not your chance");
+    return;
+  }
 
   socket.on("position", (position) => {
     if (position > 9 || position < 0) {
@@ -78,6 +85,9 @@ function takeTurn(socket, uid) {
     }
   });
 
+  let chance = onlineUsers[uid].sign == "x" ? "o" : "x";
+  nextChance[onlineUsers[uid].room] = chance;
+
   return false;
 }
 
@@ -87,9 +97,6 @@ function checkWinner(id) {
       return true;
     }
   });
-
-  let chance = onlineUsers[uid].sign == "x" ? "o" : "x";
-  nextChance[onlineUsers[uid].room] = chance;
 
   return false;
 }
