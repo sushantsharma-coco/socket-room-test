@@ -4,6 +4,7 @@ let {
   onlineUsersCounter,
   board,
   winningCombinations,
+  nextChance,
 } = require("./state");
 
 function addUser(socket, sid, uid) {
@@ -57,6 +58,8 @@ function addUser(socket, sid, uid) {
 function takeTurn(socket, uid) {
   socket.emit("take-turn", "its your turn choose a position");
 
+  nextChance[onlineUsers[uid].room] = onlineUsers[uid].sign;
+
   socket.on("position", (position) => {
     if (position > 9 || position < 0) {
       socket.emit("invalid-position", `position : ${position} is invalid`);
@@ -84,6 +87,10 @@ function checkWinner(id) {
       return true;
     }
   });
+
+  let chance = onlineUsers[uid].sign == "x" ? "o" : "x";
+  nextChance[onlineUsers[uid].room] = chance;
+
   return false;
 }
 
