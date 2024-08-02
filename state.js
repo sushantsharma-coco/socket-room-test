@@ -1,5 +1,8 @@
-const onlineUsers = {}; // uid :{uno:onlineusercount, sid:sid,sign:x/o,room:roomNumber}
+const onlineUsers = {}; // room-num :[{uno:0/1, sid:sid,sign:x/o, uid:uid,userCountNumber:count}]
+
 let onlineUsersCounter = 0;
+let roomCounter = 0;
+
 const signOptions = {
   x: "x",
   o: "o",
@@ -7,7 +10,7 @@ const signOptions = {
 
 const board = ["", "", "", "", "", "", "", "", ""];
 
-const nextChance = {};
+const nextChance = {}; // nextChance = {room:"socketid"}
 
 const winningCombinations = [
   [0, 1, 2],
@@ -24,6 +27,7 @@ module.exports = {
   onlineUsers,
   signOptions,
   onlineUsersCounter,
+  roomCounter,
   board,
   winningCombinations,
   nextChance,
