@@ -17,21 +17,19 @@ try {
 
     if (!user_id) return;
 
-    let x = addUser(socket, user_id);
+    addUser(socket, user_id);
 
-    if (x) console.log("object", onlineUsers);
+    let { winner, roomNumber } = takeTurn(roomNumber, socket);
 
-    // tictactoe
-    //   .to(onlineUsers[user_id].room)
-    //   .emit("all", socket.id + " connected");
+    if (winner) {
+      tictactoe.to(roomNumber).emit("winner", `${winner} won`);
 
-    // let ifWinner = takeTurn(socket);
+      tictactoe.to(roomNumber).emit("game ended", () => {
+        tictactoe.adapter.del(onlineUsers[roomNumber][0].sid);
+        tictactoe.adapter.del(onlineUsers[roomNumber][1].sid);
+      });
+    }
 
-    // if (ifWinner) {
-    //   ((uid) => {
-    //     tictactoe.socketsLeave(onlineUsers[uid].room);
-    //   })();
-    // }
     socket.on("disconnect", () => {
       io.emit("all", socket.id + " disconnected");
 

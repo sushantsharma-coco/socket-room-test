@@ -8,7 +8,7 @@ const signOptions = {
   o: "o",
 };
 
-const board = ["", "", "", "", "", "", "", "", ""];
+const board = {};
 
 const nextChance = {}; // nextChance = {room:"socketid"}
 

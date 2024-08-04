@@ -1,4 +1,9 @@
-const { onlineUsers } = require("./state");
+const {
+  onlineUsers,
+  nextChance,
+  board,
+  winningCombinations,
+} = require("./state");
 let { onlineUsersCounter, roomCounter } = require("./state");
 
 async function addUser(socket, uid) {
@@ -26,6 +31,10 @@ async function addUser(socket, uid) {
     });
 
     socket.join("room-0");
+
+    board["room-0"] = ["", "", "", "", "", "", "", "", ""];
+
+    nextChance["room-0"] = onlineUsers["room-0"][0].sign;
 
     onlineUsersCounter++;
 
@@ -65,15 +74,14 @@ async function addUser(socket, uid) {
           socket.emit("400", "incorrect sign choice");
 
         onlineUsers["room-" + roomCounter][0].sign = sign;
-        console.log(
-          "rooms----------------",
-          onlineUsers["room-" + roomCounter]
-        );
       });
+
+      nextChance["room-" + roomCounter] =
+        onlineUsers["room-" + roomCounter][0].sign;
     }
 
     socket.join("room-" + roomCounter);
-
+    board["room-" + roomCounter] = ["", "", "", "", "", "", "", "", ""];
     console.log("socket rooms ", socket.rooms);
     console.log("add final ", onlineUsers);
 
@@ -83,8 +91,65 @@ async function addUser(socket, uid) {
   }
 }
 
+function takeTurn(socket) {
+  // considering roomnumber is sent from frontend
+  // TODO :   first need to check for turn and only that person should be able to take turn
+
+  socket.emit(
+    "take-turn",
+    `choose position where board is empty string ${board}`
+  );
+
+  socket.on("position", (position, uno, roomNumber) => {
+    if (onlineUsers[roomNumber][uno].sign !== nextChance[roomNumber]) {
+      socket.emit("invalid-chance", `it's ${nextChance[roomNumber]} chance`);
+      return;
+    }
+
+    if (position > 9 || position < 0) {
+      socket.emit(
+        "invalid-position",
+        "chosen position is invalid as its out of range :",
+        position
+      );
+
+      return;
+    }
+
+    if (board[roomNumber][position] !== "") {
+      socket.emit(
+        "wrong-position",
+        "chosen position is already filled, choose another one"
+      );
+    }
+
+    board[roomNumber][position] = socket.id;
+
+    if (checkWinner(socket)) {
+      return { winner: socket.id, roomNumber };
+    }
+
+    return { winner: false, roomNumber };
+  });
+
+  return;
+}
+
+function checkWinner(socket) {
+  winningCombinations.forEach(([a, b, c]) => {
+    if (
+      ((board[roomNumber][a] == board[roomNumber][b]) ==
+        board[roomNumber][c]) ===
+      socket.id
+    ) {
+      return true;
+    }
+  });
+}
+
 module.exports = {
   addUser,
+  takeTurn,
 };
 
 // let {
